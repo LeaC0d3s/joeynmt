@@ -198,10 +198,12 @@ class TransformerEncoderLayer(nn.Module):
         :param mask: input mask
         :return: output tensor
         """
-        x_norm = self.layer_norm(x)
-        h = self.src_src_att(x_norm, x_norm, x_norm, mask)
-        h = self.dropout(h) + x
-        o = self.feed_forward(h)
+        #change for postnorm!
+        #x_norm = self.layer_norm(x)
+        h = self.src_src_att(x, x, x, mask)
+        h_norm = self.layer_norm(h)
+        h_norm = self.dropout(h_norm) + x
+        o = self.feed_forward(h_norm)
         return o
 
 
@@ -259,15 +261,17 @@ class TransformerDecoderLayer(nn.Module):
         :return: output tensor
         """
         # decoder/target self-attention
-        x_norm = self.x_layer_norm(x)
-        h1 = self.trg_trg_att(x_norm, x_norm, x_norm, mask=trg_mask)
+        #x_norm = self.x_layer_norm(x)
+        h1 = self.trg_trg_att(x, x, x, mask=trg_mask) # change x_norm to x and add layer norm afterwards
         h1 = self.dropout(h1) + x
+        h1_norm = self.x_layer_norm(h1)
 
         # source-target attention
-        h1_norm = self.dec_layer_norm(h1)
+        #h1_norm = self.dec_layer_norm(h1) #prenorm
         h2 = self.src_trg_att(memory, memory, h1_norm, mask=src_mask)
+        h2_norm = self.dec_layer_norm(h2)
 
         # final position-wise feed-forward layer
-        o = self.feed_forward(self.dropout(h2) + h1)
+        o = self.feed_forward(self.dropout(h2_norm) + h1_norm)
 
         return o
