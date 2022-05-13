@@ -217,9 +217,9 @@ class TransformerEncoder(Encoder):
         x = self.pe(embed_src)  # add position encoding to word embeddings
         x = self.emb_dropout(x)
 
-        for layer in self.layers:
+        for layer in self.layers: #Postnormalization approach!
             x = layer(x, mask)
-        return self.layer_norm(x), None
+        return x, None # return the layer x
 
     def __repr__(self):
         return f"{self.__class__.__name__}(num_layers={len(self.layers)}, " \
