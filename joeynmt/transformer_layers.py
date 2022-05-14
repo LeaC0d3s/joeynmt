@@ -189,7 +189,7 @@ class TransformerEncoderLayer(nn.Module):
     # pylint: disable=arguments-differ
     def forward(self, x: Tensor, mask: Tensor) -> Tensor:
         """
-        Forward pass for a single transformer encoder layer.
+        Forward pass for a single transformer encoder layer. (Sublayer PreNorm)
         First applies layer norm, then self attention,
         then dropout with residual connection (adding the input to the result),
         and then a position-wise feed-forward layer.
@@ -201,7 +201,8 @@ class TransformerEncoderLayer(nn.Module):
         x_norm = self.layer_norm(x)
         h = self.src_src_att(x_norm, x_norm, x_norm, mask)
         h = self.dropout(h) + x
-        o = self.feed_forward(h)
+        h_norm = self.layer_norm(h)
+        o = self.feed_forward(h) + h_norm
         return o
 
 
@@ -250,7 +251,7 @@ class TransformerDecoderLayer(nn.Module):
                 src_mask: Tensor = None,
                 trg_mask: Tensor = None) -> Tensor:
         """
-        Forward pass of a single Transformer decoder layer.
+        Forward pass of a single Transformer decoder layer. (Sublayer PreNorm)
 
         :param x: inputs
         :param memory: source representations
@@ -259,15 +260,16 @@ class TransformerDecoderLayer(nn.Module):
         :return: output tensor
         """
         # decoder/target self-attention
-        x_norm = self.x_layer_norm(x)
-        h1 = self.trg_trg_att(x_norm, x_norm, x_norm, mask=trg_mask)
-        h1 = self.dropout(h1) + x
+        x_norm = self.x_layer_norm(x) #Prenorm
+        h1 = self.trg_trg_att(x_norm, x_norm, x_norm, mask=trg_mask) #1st sublayer with layernorm as input
+        h1 = self.dropout(h1) + x # add residual connection
 
         # source-target attention
-        h1_norm = self.dec_layer_norm(h1)
-        h2 = self.src_trg_att(memory, memory, h1_norm, mask=src_mask)
+        h1_norm = self.dec_layer_norm(h1) # Prenorm
+        h2 = self.src_trg_att(memory, memory, h1_norm, mask=src_mask) + h1 # 2nd sublayer + residual connection
 
         # final position-wise feed-forward layer
-        o = self.feed_forward(self.dropout(h2) + h1)
+        h2_norm = self.dec_layer_norm(h2) # Prenorm
+        o = self.feed_forward(self.dropout(h2_norm) + h1_norm) #3rd sublayer + residual connection
 
         return o

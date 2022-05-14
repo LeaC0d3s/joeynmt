@@ -531,12 +531,12 @@ class TransformerDecoder(Decoder):
 
         trg_mask = trg_mask & subsequent_mask(
             trg_embed.size(1)).type_as(trg_mask)
-
+        #Prenorm
         for layer in self.layers:
             x = layer(x=x, memory=encoder_output,
                       src_mask=src_mask, trg_mask=trg_mask)
 
-        x = self.layer_norm(x)
+
         output = self.output_layer(x)
 
         return output, x, None, None
