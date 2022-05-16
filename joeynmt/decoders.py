@@ -536,7 +536,7 @@ class TransformerDecoder(Decoder):
             x = layer(x=x, memory=encoder_output,
                       src_mask=src_mask, trg_mask=trg_mask)
 
-        x = self.layer_norm(x)
+        x = self.layer_norm(x) # Post-Normalization of final FF sublayers of all layers
         output = self.output_layer(x)
 
         return output, x, None, None

@@ -219,6 +219,7 @@ class TransformerEncoder(Encoder):
 
         for layer in self.layers:
             x = layer(x, mask)
+        # Post-Normalization is applied on final FF sublayer of all looped over Layers
         return self.layer_norm(x), None
 
     def __repr__(self):

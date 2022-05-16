@@ -198,7 +198,7 @@ class TransformerEncoderLayer(nn.Module):
         :param mask: input mask
         :return: output tensor
         """
-        x_norm = self.layer_norm(x)
+        x_norm = self.layer_norm(x) #Layernormalization (Pre-Norm for Sublayer 1 MHAtt + Post Norm for Sublayer 2 FF)
         h = self.src_src_att(x_norm, x_norm, x_norm, mask)
         h = self.dropout(h) + x
         o = self.feed_forward(h)
@@ -259,12 +259,12 @@ class TransformerDecoderLayer(nn.Module):
         :return: output tensor
         """
         # decoder/target self-attention
-        x_norm = self.x_layer_norm(x)
+        x_norm = self.x_layer_norm(x) # Layernormalization (Pre-Norm for Sublayer 1 MMHAtt + Post Norm for Sublayer 3 FF)
         h1 = self.trg_trg_att(x_norm, x_norm, x_norm, mask=trg_mask)
         h1 = self.dropout(h1) + x
 
         # source-target attention
-        h1_norm = self.dec_layer_norm(h1)
+        h1_norm = self.dec_layer_norm(h1) # Pre-Norm on Sublayer 2 MHAtt
         h2 = self.src_trg_att(memory, memory, h1_norm, mask=src_mask)
 
         # final position-wise feed-forward layer
