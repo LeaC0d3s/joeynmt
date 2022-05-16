@@ -199,7 +199,6 @@ class TransformerEncoderLayer(nn.Module):
         :return: output tensor
         """
         #change for postnorm!
-        #x_norm = self.layer_norm(x)
         h = self.src_src_att(x, x, x, mask) #MultiheadAtt (Sublayer 1)
         h = self.dropout(h) + x # add residual connection
         h_norm = self.layer_norm(h) # apply Layernorm

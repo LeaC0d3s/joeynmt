@@ -219,7 +219,7 @@ class TransformerEncoder(Encoder):
 
         for layer in self.layers: #Postnormalization approach!
             x = layer(x, mask)
-        return x, None # return the layer x
+        return x, None
 
     def __repr__(self):
         return f"{self.__class__.__name__}(num_layers={len(self.layers)}, " \
